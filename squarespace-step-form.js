@@ -51,46 +51,46 @@
             const maxAge = parseInt(match[2], 10);
             return [minAge, maxAge];
         }
-        return null; // Если формат строки неверный
+        return null; // Invalid string format
     }
 
     function parseStartCampDate(dateRange) {
         const match = dateRange.match(/(\d+)\s+([A-Za-z]+)/);
         if (match) {
-            const day = parseInt(match[1], 10); // День, например, 30
-            const month = match[2]; // Месяц, например, June
+            const day = parseInt(match[1], 10); // Day, e.g. 30
+            const month = match[2]; // Month, e.g. June
 
-            // Текущий год и месяц
+            // Current year and month
             const currentDate = new Date();
             const currentYear = currentDate.getFullYear();
-            const currentMonth = currentDate.getMonth(); // 0-11 (январь = 0)
+            const currentMonth = currentDate.getMonth(); // 0-11 (January = 0)
 
-            // Создаем дату для ближайшего года
+            // Create date for the nearest year
             const date = new Date(`${day} ${month} ${currentYear}`);
-            const parsedMonth = date.getMonth(); // 0-11 (месяц из строки)
+            const parsedMonth = date.getMonth(); // 0-11 (month from string)
 
-            // Если месяц в диапазоне раньше текущего месяца, используем следующий год
+            // If month in range is before current month, use next year
             if (parsedMonth < currentMonth) {
                 date.setFullYear(currentYear + 1);
             }
 
             if (!isNaN(date)) {
-                return date; // Возвращаем валидную дату
+                return date; // Return valid date
             }
         }
-        return null; // Если формат не подошел
+        return null; // Format did not match
     }
 
     function isAgeWithinRange(birthDate, eventStartDate, ageRange) {
-        const [minAge, maxAge] = ageRange; // Распаковываем минимальный и максимальный возраст
+        const [minAge, maxAge] = ageRange; // Unpack min and max age
 
-        // Рассчитываем возраст на момент начала события
+        // Calculate age at event start
         const birth = birthDate;
         const eventStart = eventStartDate;
 
         let age = eventStart.getFullYear() - birth.getFullYear();
 
-        // Уточняем возраст, если день рождения еще не наступил в году события
+        // Adjust age if birthday has not occurred yet in event year
         const hasHadBirthdayThisYear =
             eventStart.getMonth() > birth.getMonth() ||
             (eventStart.getMonth() === birth.getMonth() && eventStart.getDate() >= birth.getDate());
@@ -99,7 +99,7 @@
             age -= 1;
         }
 
-        // Проверяем, попадает ли возраст в диапазон
+        // Check if age is within range
         return age >= minAge && age <= maxAge;
     }
 
@@ -704,10 +704,10 @@
         }
 
         function submitForm() {
-            // Собираем данные формы
+            // Collect form data
             const formData = getFormData();
 
-            const crumbValue = getCookie("crumb"); // Предполагаем, что getCookie определена где-то еще
+            const crumbValue = getCookie("crumb"); // Assumes getCookie is defined elsewhere
 
             $.ajax({
                 type: "POST",
@@ -741,20 +741,20 @@
         function disableNextButton($button) {
             const allRequiredFields = $("#stepForm").find("[required]");
             const isValid = [...allRequiredFields].every((field) => {
-                // Проверка для select
+                // Check for select
                 if ($(field).is("select") && $(field).val() === "Please select") {
                     return false;
                 }
-                // Проверка для всех других полей
+                // Check for all other fields
                 return field.type === "checkbox"
                     ? field.checked
                     : field.value.trim() !== "";
             });
 
             if (isValid) {
-                $button.prop("disabled", false); // Разрешаем переход к следующему шагу
+                $button.prop("disabled", false); // Allow proceeding to next step
             } else {
-                $button.prop("disabled", true); // Блокируем кнопку, если поля не заполнены
+                $button.prop("disabled", true); // Disable button if fields are not filled
             }
         }
 
@@ -825,7 +825,7 @@
                     value = fieldValue;
                 }
             } else {
-                // Для других типов полей берем обычное значение
+                // For other field types use regular value
                 const fieldValue = $(`[name=${field.id}]`).val();
                 if (fieldValue) {
                     value = fieldValue;
@@ -914,7 +914,7 @@
         function apiValidateStep() {
             const formData = getFormData();
             const formId = parsedConfig.additionalFieldsForm.id;
-            const crumbValue = getCookie("crumb"); // Предполагаем, что getCookie определена где-то еще
+            const crumbValue = getCookie("crumb"); // Assumes getCookie is defined elsewhere
 
             const customErrors = localValidate();
 
@@ -960,7 +960,7 @@
         }
 
         function submitTempForm(formCompleted = false) {
-            // Собирать все данные формы
+            // Collect all form data
             const formData = {};
 
             formConfig.steps.forEach((step) => {
@@ -969,7 +969,7 @@
 
                     if (field.type === "password") continue;
 
-                    // Если это чекбоксы
+                    // Checkboxes
                     if (field.type === "checkbox") {
                         fieldValue = [];
                         $(`[name=${field.id}]:checked`).each(function () {
@@ -980,24 +980,24 @@
                             formData[field.id] = fieldValue;
                         }
                     }
-                    // Если это радио-кнопки
+                    // Radio buttons
                     else if (field.type === "radio") {
                         fieldValue = $(`[name=${field.id}]:checked`).val();
                         if (fieldValue) {
                             formData[field.id] = fieldValue;
                         }
                     }
-                    // Если это селект
+                    // Select
                     else if (field.type === "select") {
                         fieldValue = $(`[name=${field.id}]`).val();
                         if (fieldValue === "Please select") {
-                            fieldValue = ""; // Если выбрано "Please select", отправляем пустое значение
+                            fieldValue = ""; // If "Please select" is chosen, send empty value
                         }
                         if (fieldValue) {
                             formData[field.id] = fieldValue;
                         }
                     }
-                    // Если это поле с несколькими inputs
+                    // Field with multiple inputs
                     else if (field.type === "name" ||
                         field.type === "address" ||
                         field.type === "phone" ||
@@ -1046,7 +1046,7 @@
                             formData[field.id] = fieldValue.join('/');
                         }
                     }
-                    // Если это текстовые поля
+                    // Text fields
                     else {
                         fieldValue = $(`[name=${field.id}]`).val();
                         if (fieldValue) {
@@ -1055,11 +1055,11 @@
                     }
                 };
 
-                // Добавляем config_data в formData
+                // Add config_data to formData
                 formData["config_data"] = $(`[name=${"config_data"}]`).val();
             });
 
-            const crumbValue = getCookie("crumb"); // Assuming getCookie is defined elsewhere
+            const crumbValue = getCookie("crumb"); // Assumes getCookie is defined elsewhere
 
             !!SUBMIT_TEMP_FORM_API_URL && $.ajax({
                 type: "POST",
@@ -1068,7 +1068,7 @@
                     randomValue: randomValue,
                     tm: +new Date(),
                     formCompleted,
-                    formData: formData, // Отправляем все данные формы
+                    formData: formData, // Send all form data
                 }),
                 contentType: "application/json",
                 // success: function (response) {
@@ -1138,11 +1138,11 @@
                             }
                         }));
 
-                        // Открытие попапа с формой
+                        // Open popup with form
                         $("#dynamicPopup").css("display", "block").addClass("show");
                         $("#dynamicPopupLabel").text(parsedConfig.additionalFieldsForm.name);
                         document.body.style.overflow = 'hidden';
-                        // Заполнение формы, если необходимо
+                        // Populate form if needed
                     },
                 })
             );
