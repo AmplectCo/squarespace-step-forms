@@ -1,3 +1,83 @@
+(function () {
+  var STORAGE_KEY = 'marketing_attribution_v1';
+
+  var trackedExact = [
+    'utm_source',
+    'utm_medium',
+    'utm_campaign',
+    'utm_content',
+    'utm_term',
+    'utm_id',
+    'utm_source_platform',
+    'utm_creative_format',
+    'utm_marketing_tactic',
+    'gclid',
+    'gbraid',
+    'wbraid',
+    'fbclid',
+    'msclkid',
+    'yclid',
+    'ttclid',
+    'li_fat_id',
+    'twclid'
+  ];
+
+  function getStored() {
+    try {
+      return JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}');
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function save(data) {
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (e) {}
+  }
+
+  function capture() {
+    var url = new URL(window.location.href);
+    var stored = getStored();
+    var changed = false;
+
+    url.searchParams.forEach(function (value, key) {
+      var normalizedKey = key.toLowerCase();
+
+      var isTracked =
+        trackedExact.indexOf(normalizedKey) !== -1 ||
+        normalizedKey.indexOf('gad_') === 0;
+
+      if (!isTracked || !value) return;
+
+      /*
+       * First touch:
+       * do not overwrite the original source on in-site navigation.
+       *
+       * For last-touch logic, replace the condition
+       * `if (!stored[key])` with `if (true)`.
+       */
+      if (!stored[key]) {
+        stored[key] = value;
+        changed = true;
+      }
+    });
+
+    if (!stored.landing_page) {
+      stored.landing_page = window.location.href;
+      stored.landing_path = window.location.pathname;
+      stored.captured_at = new Date().toISOString();
+      changed = true;
+    }
+
+    if (changed) save(stored);
+  }
+
+  window.getMarketingAttribution = getStored;
+
+  capture();
+})();
+
 (function stepForms() {
     const url = new URL(window.location.href); // Current page's URL
     const urlParams = new URLSearchParams(url.search);
@@ -16,9 +96,14 @@
     const url_parameters = [];
 
     function extractUrlParameters() {
-        const params = [];
-        const urlParams = new URLSearchParams(window.location.search);
-        urlParams.forEach((value, key) => {
+        const savedParameters = Object.entries(window.getMarketingAttribution() || {}).map(([key, value]) => ({ key, value }));
+        
+        if (savedParameters.length) {
+            url_parameters.push(...savedParameters);
+            return;
+        }
+
+        new URLSearchParams(window.location.search).forEach((value, key) => {
             url_parameters.push({ key, value });
         });
     }
