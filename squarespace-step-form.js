@@ -50,23 +50,15 @@
 
       if (!isTracked || !value) return;
 
-      /*
-       * First touch:
-       * do not overwrite the original source on in-site navigation.
-       *
-       * For last-touch logic, replace the condition
-       * `if (!stored[key])` with `if (true)`.
-       */
       if (!stored[key]) {
         stored[key] = value;
         changed = true;
       }
     });
 
-    if (!stored.attribution_url) {
+    if (changed && !stored.attribution_url) {
       stored.attribution_url = window.location.href;
       stored.attribution_captured_at = new Date().toISOString();
-      changed = true;
     }
 
     if (changed) save(stored);
