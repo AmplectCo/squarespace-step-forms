@@ -63,10 +63,9 @@
       }
     });
 
-    if (!stored.landing_page) {
-      stored.landing_page = window.location.href;
-      stored.landing_path = window.location.pathname;
-      stored.captured_at = new Date().toISOString();
+    if (!stored.attribution_url) {
+      stored.attribution_url = window.location.href;
+      stored.attribution_captured_at = new Date().toISOString();
       changed = true;
     }
 
